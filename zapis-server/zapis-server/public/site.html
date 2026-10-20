@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Навбат — онлайн-запись и учёт для салонов красоты</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@600;700&display=swap">
+<style>
+:root{--bg:#fbf8f3;--sf:#fff;--tx:#1c2321;--mu:#5f6b66;--ac:#0f766e;--on:#fff;--co:#e8654a;--ln:#e6dfd3;--soft:#e7f3ef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101816;--sf:#17221f;--tx:#eaf2ee;--mu:#9fb0a9;--ac:#2dd4bf;--on:#08201c;--co:#ff8a70;--ln:#2a3a35;--soft:#173630}}
+:root[data-theme="dark"]{--bg:#101816;--sf:#17221f;--tx:#eaf2ee;--mu:#9fb0a9;--ac:#2dd4bf;--on:#08201c;--co:#ff8a70;--ln:#2a3a35;--soft:#173630}
+html{scroll-padding-top:calc(70px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 Manrope,"Segoe UI",Roboto,Arial,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:50}
+h1,h2,h3{font-family:Unbounded,Manrope,"Segoe UI",Arial,sans-serif;line-height:1.15;margin:0}
+a{color:inherit}
+.w{max-width:1080px;margin:auto;padding:0 18px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--bg);border-bottom:1px solid var(--ln)}
+.hd{display:flex;align-items:center;gap:18px;height:64px}
+.logo{font:700 20px Unbounded,Manrope,sans-serif;text-decoration:none;color:var(--ac)}
+.hd nav{display:flex;gap:18px;flex:1;justify-content:center}
+.hd nav a{text-decoration:none;color:var(--mu);font-weight:600;font-size:15px}
+.btn{display:inline-block;background:var(--ac);color:var(--on);border-radius:12px;padding:12px 20px;font-weight:800;text-decoration:none;border:0;cursor:pointer;font-family:inherit;font-size:15px}
+.btn.o{background:none;color:var(--tx);border:1.5px solid var(--ln)}
+:focus-visible{outline:3px solid var(--co);outline-offset:2px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center;padding:56px 0 40px}
+.tag{display:inline-block;background:var(--soft);color:var(--ac);font-weight:800;font-size:13px;padding:5px 12px;border-radius:99px;margin-bottom:16px}
+.hero h1{font-size:clamp(28px,5vw,46px)}
+.hero p{color:var(--mu);font-size:18px;margin:18px 0 26px;max-width:520px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.mock{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:14px;box-shadow:0 18px 50px rgba(15,60,50,.12)}
+.mock .mh{font-weight:800;font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between}.mock .mh span{color:var(--mu);font-weight:600}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.col{position:relative;height:230px;border-radius:10px;background:repeating-linear-gradient(var(--ln) 0 1px,transparent 1px 46px);border-top:4px solid}
+.col b{position:absolute;top:4px;left:6px;font-size:12px}
+.col i{position:absolute;left:4px;right:4px;border-radius:8px;padding:4px 6px;font-style:normal;font-size:11px;line-height:1.25;background:var(--soft);border-left:4px solid}
+section{padding:56px 0}
+h2{font-size:clamp(24px,4vw,34px);margin-bottom:10px}.lead{color:var(--mu);max-width:620px;margin:0 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:20px}
+.card h3{font-size:16px;margin:12px 0 6px}.card p{margin:0;color:var(--mu);font-size:15px}
+.ic{width:42px;height:42px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font-size:21px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{background:var(--sf);border:1.5px solid var(--ln);color:var(--tx);border-radius:99px;padding:8px 16px;font:700 14px Manrope,sans-serif;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.st{float:right;font-size:12px;font-weight:800;border-radius:99px;padding:2px 10px;background:var(--soft);color:var(--ac)}.st.s{background:none;border:1px solid var(--ln);color:var(--mu)}
+.price{position:relative}.price .big{font:700 30px Unbounded,sans-serif;margin:10px 0 4px}.price ul{padding-left:18px;color:var(--mu);margin:12px 0 18px}
+.price.hot{border:2px solid var(--ac)}.hot .tag{position:absolute;top:-14px;right:16px;margin:0;background:var(--co);color:#1c1210}
+details{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:14px 18px;margin-bottom:10px}
+summary{font-weight:800;cursor:pointer}details p{color:var(--mu);margin:10px 0 0}
+.cta{background:var(--ac);color:var(--on);border-radius:24px;padding:40px 24px;text-align:center}
+.cta p{margin:10px 0 22px;opacity:.9}.cta .btn{background:var(--bg);color:var(--tx)}
+footer{padding:30px 0;color:var(--mu);font-size:14px;border-top:1px solid var(--ln);margin-top:56px}
+@media (max-width:760px){.hero{grid-template-columns:1fr;padding-top:32px}.hd nav{display:none}.hd{justify-content:space-between}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header><div class="w hd"><a class="logo" href="#">Навбат</a><nav><a href="#feat">Возможности</a><a href="#integ">Интеграции</a><a href="#price">Тарифы</a><a href="#faq">Вопросы</a></nav><a class="btn" href="/app">Попробовать</a></div></header>
+
+<main>
+<div class="w hero">
+ <div>
+  <span class="tag">Для салонов красоты и барбершопов</span>
+  <h1>Записи клиентов, сотрудники и деньги в одном месте</h1>
+  <p>Онлайн-запись по ссылке, журнал по мастерам, склад, зарплата и программа лояльности. Работает в браузере с телефона и компьютера.</p>
+  <div class="row"><a class="btn" href="/app">Начать бесплатно</a><a class="btn o" href="#feat">Что внутри</a></div>
+ </div>
+ <div class="mock" aria-hidden="true">
+  <div class="mh">Журнал записей <span>Сегодня</span></div>
+  <div class="cols">
+   <div class="col" style="border-color:#0f766e"><b>Дилноза</b><i style="top:40px;height:84px;border-color:#0f766e"><b style="position:static">10:00</b><br>Азиза · стрижка</i><i style="top:150px;height:46px;border-color:#0f766e"><b style="position:static">13:00</b> Нодира</i></div>
+   <div class="col" style="border-color:#e8654a"><b>Мадина</b><i style="top:70px;height:84px;border-color:#e8654a"><b style="position:static">11:30</b><br>Маникюр</i></div>
+   <div class="col" style="border-color:#7c3aed"><b>Сардор</b><i style="top:24px;height:44px;border-color:#7c3aed"><b style="position:static">09:30</b> Жасур</i><i style="top:120px;height:44px;border-color:#7c3aed"><b style="position:static">12:30</b> Бекзод</i></div>
+  </div>
+ </div>
+</div>
+
+<section id="feat"><div class="w"><h2>Всё для ежедневной работы салона</h2><p class="lead">Основное уже работает в программе. Остальное мы добавляем по запросам салонов.</p>
+ <div class="grid">
+  <div class="card"><div class="ic">📅</div><h3>Журнал записей</h3><p>Колонки по мастерам, статусы визита, предупреждение, если мастер занят.</p></div>
+  <div class="card"><div class="ic">🔗</div><h3>Онлайн-запись</h3><p>Клиент выбирает услугу, мастера и свободное время по вашей ссылке.</p></div>
+  <div class="card"><div class="ic">👥</div><h3>База клиентов</h3><p>История визитов, заметки, сумма покупок, поиск по имени и телефону.</p></div>
+  <div class="card"><div class="ic">🎁</div><h3>Лояльность</h3><p>Бонусы с каждого визита и скидка, которая растёт вместе с покупками клиента.</p></div>
+  <div class="card"><div class="ic">📦</div><h3>Склад</h3><p>Остатки расходников и отметка, когда пора докупать.</p></div>
+  <div class="card"><div class="ic">💵</div><h3>Зарплата и отчёты</h3><p>Процент мастеров, выручка за месяц, средний чек и динамика за неделю.</p></div>
+ </div></div></section>
+
+<section id="integ"><div class="w"><h2>Подключения</h2><p class="lead">Уведомления, онлайн-запись и оплата. Честно отмечаем, что уже работает, а что на подходе.</p>
+ <div class="tabs" role="tablist" id="tabs"></div><div class="grid" id="ig" role="tabpanel"></div></div></section>
+
+<section id="price"><div class="w"><h2>Тарифы</h2><p class="lead">Цены в этом примере условные: замените их на свои.</p>
+ <div class="grid">
+  <div class="card price"><h3>Старт</h3><div class="big">0 сум</div><div class="mu" style="color:var(--mu)">для одного мастера</div><ul><li>Журнал записей</li><li>Страница онлайн-записи</li><li>База клиентов</li></ul><a class="btn o" href="/app">Выбрать</a></div>
+  <div class="card price hot"><span class="tag">Популярный</span><h3>Салон</h3><div class="big">99 000 сум</div><div style="color:var(--mu)">в месяц</div><ul><li>До 10 сотрудников</li><li>Склад и зарплата</li><li>Лояльность и отчёты</li></ul><a class="btn" href="/app">Выбрать</a></div>
+  <div class="card price"><h3>Сеть</h3><div class="big">По запросу</div><div style="color:var(--mu)">несколько филиалов</div><ul><li>Всё из тарифа «Салон»</li><li>Несколько филиалов</li><li>Помощь с переходом</li></ul><a class="btn o" href="#cta">Связаться</a></div>
+ </div></div></section>
+
+<section id="faq"><div class="w"><h2>Частые вопросы</h2><div style="margin-top:20px">
+ <details><summary>Нужно ли устанавливать программу?</summary><p>Нет. Навбат открывается в браузере на телефоне и компьютере. Данные хранятся на сервере и одинаково видны на всех устройствах.</p></details>
+ <details><summary>Как клиенты записываются онлайн?</summary><p>У каждого салона есть своя ссылка. Клиент выбирает услугу, мастера и время, и запись сразу появляется в вашем журнале.</p></details>
+ <details><summary>Можно ли перенести данные из другой программы?</summary><p>Список клиентов и услуг можно передать нам в таблице, мы поможем с загрузкой. Сначала лучше неделю-две поработать параллельно.</p></details>
+ <details><summary>Когда будут SMS и онлайн-оплата?</summary><p>Они в разработке. Напишите, что нужно вам в первую очередь, и мы учтём это в плане.</p></details>
+</div></div></section>
+
+<section id="cta"><div class="w"><div class="cta"><h2>Попробуйте на своём салоне</h2><p>Создайте аккаунт за минуту, добавьте мастеров и услуги, отправьте клиентам ссылку на запись.</p><a class="btn" href="/app">Создать аккаунт</a></div></div></section>
+</main>
+<footer><div class="w row" style="justify-content:space-between"><span>© Навбат, 2026</span><span>Контакты: укажите телефон и почту</span></div></footer>
+
+<script>
+const D={"Уведомления":[["SMS-напоминания","Клиент получает напоминание о визите.",0],["WhatsApp-уведомления","Подтверждения и напоминания в мессенджере.",0],["Telegram-бот","Записи и сообщения администратору.",0]],
+"Онлайн-запись":[["Страница записи","Ссылка для клиентов вида navbat.kz/b/ваш-салон.",1],["Виджет для сайта","Форма записи прямо на вашем сайте.",0],["Кнопка в Instagram","Кнопка «Записаться» в профиле.",0]],
+"Оплата":[["Оплата на месте","Отметка «Оплачено» в журнале, бонусы и скидки учитываются.",1],["Click","Онлайн-оплата картой.",0],["Payme","Онлайн-оплата картой.",0]]};
+const tb=document.getElementById("tabs"),ig=document.getElementById("ig");let cur="Уведомления";
+function draw(){tb.innerHTML=Object.keys(D).map(k=>`<button role="tab" aria-selected="${k==cur}" data-k="${k}">${k}</button>`).join("");
+ ig.innerHTML=D[cur].map(([n,d,ok])=>`<div class="card"><span class="st ${ok?"":"s"}">${ok?"Работает":"Скоро"}</span><h3 style="margin-top:0">${n}</h3><p>${d}</p></div>`).join("")}
+tb.onclick=e=>{const k=e.target.dataset.k;if(k){cur=k;draw()}};draw();
+</script>
+</body>
+</html>

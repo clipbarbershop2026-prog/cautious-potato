@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Онлайн-запись</title>
+<style>
+:root{--bg:#f3f6f4;--sf:#fff;--tx:#14231e;--mu:#62716b;--ac:#0f766e;--ac2:#d9efea;--bd:#dbe4e0;--rd:#b91c1c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1815;--sf:#16251f;--tx:#e8f1ed;--mu:#93a59d;--ac:#2dd4bf;--ac2:#173a34;--bd:#264038;--rd:#f87171}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:480px;margin:auto;padding:16px}h1{font-size:22px;margin:4px 0 2px}.mu{color:var(--mu);font-size:14px}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 4px}
+input,select{width:100%;font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:11px}
+.btn{background:var(--ac);color:var(--bg);border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:600;cursor:pointer;width:100%;margin-top:14px}
+.sl{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.sl button{background:var(--ac2);color:var(--ac);border:2px solid transparent;border-radius:10px;padding:9px 13px;font:inherit;font-weight:600;cursor:pointer}.sl button.on{border-color:var(--ac)}
+.er{color:var(--rd);min-height:22px;margin-top:8px}.ok{background:var(--ac2);border-radius:12px;padding:18px;margin-top:16px}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+</style></head><body><main id="m"><div class="mu">Загрузка…</div></main>
+<script>
+const slug=location.pathname.split("/")[2],$=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ds=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+let D,sel={svc:0,st:0,date:ds(new Date()),slot:null},slots=[];
+const fmt=n=>Math.round(n).toLocaleString("ru-RU")+" сум";
+async function init(){const r=await fetch("/api/public/"+slug);if(!r.ok){$("#m").innerHTML="<h1>Салон не найден</h1>";return}D=await r.json();document.title=D.name+" — запись";sel.svc=D.services[0]?.id||0;draw();load()}
+async function load(){sel.slot=null;if(!sel.svc)return;const r=await fetch(`/api/public/${slug}/slots?date=${sel.date}&service=${sel.svc}&staff=${sel.st}`);slots=r.ok?(await r.json()).slots:[];draw()}
+function draw(){
+ if(!D.services.length){$("#m").innerHTML=`<h1>${esc(D.name)}</h1><div class="mu">Онлайн-запись пока не настроена.</div>`;return}
+ $("#m").innerHTML=`<h1>${esc(D.name)}</h1><div class="mu">Онлайн-запись</div>
+ <label>Услуга</label><select id="s">${D.services.map(s=>`<option value="${s.id}" ${s.id==sel.svc?"selected":""}>${esc(s.name)} — ${fmt(s.price)}, ${s.min} мин</option>`).join("")}</select>
+ <label>Мастер</label><select id="t"><option value="0">Любой свободный</option>${D.staff.map(s=>`<option value="${s.id}" ${s.id==sel.st?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
+ <label>Дата</label><input type="date" id="d" value="${sel.date}" min="${ds(new Date())}">
+ <label>Свободное время</label><div class="sl">${slots.length?slots.map(x=>`<button data-t="${x.t}" data-s="${x.staff}" class="${sel.slot&&sel.slot.t==x.t?"on":""}">${x.t}</button>`).join(""):'<span class="mu">Нет свободного времени. Выберите другую дату.</span>'}</div>
+ ${sel.slot?`<label>Ваше имя</label><input id="n" autocomplete="name"><label>Телефон</label><input id="p" type="tel" autocomplete="tel" placeholder="+998 90 123 45 67"><div class="er" id="e"></div><button class="btn" id="b">Записаться на ${sel.slot.t}</button>`:""}`;
+ $("#s").onchange=e=>{sel.svc=+e.target.value;load()};$("#t").onchange=e=>{sel.st=+e.target.value;load()};$("#d").onchange=e=>{sel.date=e.target.value||sel.date;load()};
+ document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{sel.slot={t:b.dataset.t,staff:+b.dataset.s};draw()});
+ if(sel.slot)$("#b").onclick=async()=>{const r=await fetch(`/api/public/${slug}/book`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service:sel.svc,staff:sel.slot.staff,date:sel.date,time:sel.slot.t,name:$("#n").value,phone:$("#p").value})}),j=await r.json();
+  if(!r.ok){$("#e").textContent=j.message||"Ошибка";if(r.status==409)load();return}
+  $("#m").innerHTML=`<h1>${esc(D.name)}</h1><div class="ok"><b>Вы записаны ✓</b><div>${sel.date}, ${sel.slot.t}</div><div class="mu">Ждём вас в салоне.</div></div>`};
+}
+init();
+</script></body></html>

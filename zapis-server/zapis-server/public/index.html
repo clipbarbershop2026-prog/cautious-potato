@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Запись — программа для салона красоты</title>
+<style>
+:root{--bg:#f3f6f4;--sf:#fff;--tx:#14231e;--mu:#62716b;--ac:#0f766e;--ac2:#d9efea;--bd:#dbe4e0;--wa:#b45309;--ok:#15803d;--rd:#b91c1c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1815;--sf:#16251f;--tx:#e8f1ed;--mu:#93a59d;--ac:#2dd4bf;--ac2:#173a34;--bd:#264038;--wa:#fbbf24;--ok:#4ade80;--rd:#f87171}}
+:root[data-theme="dark"]{--bg:#0e1815;--sf:#16251f;--tx:#e8f1ed;--mu:#93a59d;--ac:#2dd4bf;--ac2:#173a34;--bd:#264038;--wa:#fbbf24;--ok:#4ade80;--rd:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding:12px 14px 0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+h1{font-size:20px;margin:0;letter-spacing:-.2px}
+nav{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--bd);margin-top:8px}
+nav button{background:none;border:0;color:var(--mu);padding:10px 11px;font:inherit;font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer}
+nav button.on{color:var(--ac);border-color:var(--ac)}
+main{padding:14px;max-width:1000px;margin:auto}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{flex:1}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+input,select,textarea{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:9px 10px;width:100%}
+.btn{background:var(--ac);color:var(--bg);border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
+.btn.g{background:var(--ac2);color:var(--ac)}.btn.s{padding:5px 9px;font-size:13px}.btn.r{background:none;color:var(--rd)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:8px}
+.mu{color:var(--mu);font-size:13px}
+.tag{font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--ac2);color:var(--ac)}
+.tag.w{color:var(--wa)}.tag.d{color:var(--ok)}.tag.x{color:var(--rd)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+.stat b{display:block;font-size:20px}
+dialog{border:1px solid var(--bd);border-radius:12px;background:var(--sf);color:var(--tx);width:min(440px,94vw);padding:16px;max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+label{display:block;font-size:13px;color:var(--mu);margin:8px 0 3px}
+.empty{text-align:center;color:var(--mu);padding:28px 0}
+.tl{display:flex;overflow:auto;background:var(--sf);border:1px solid var(--bd);border-radius:10px;max-height:70vh}
+.hrs{position:sticky;left:0;background:var(--sf);z-index:2;width:44px;flex:none;border-right:1px solid var(--bd)}
+.hrs div{height:56px;font-size:12px;color:var(--mu);padding:2px 4px;border-top:1px solid var(--bd)}
+.col{flex:1 0 140px;border-right:1px solid var(--bd)}
+.ch{position:sticky;top:0;background:var(--sf);z-index:1;height:36px;padding:6px 8px;font-weight:600;border-bottom:3px solid;font-size:14px;white-space:nowrap;overflow:hidden}
+.bd{position:relative;background:repeating-linear-gradient(var(--bd) 0 1px,transparent 1px 56px);cursor:cell}
+.off{position:absolute;left:0;right:0;background:var(--bg);opacity:.7;pointer-events:none}
+.blk{position:absolute;left:3px;right:3px;border-radius:6px;padding:3px 6px;font-size:12px;line-height:1.25;overflow:hidden;border-left:4px solid;background:var(--ac2);cursor:pointer}
+.blk.cancel,.blk.noshow{opacity:.45}.blk.paid{background:var(--sf);outline:1px solid var(--ok)}
+.bar{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:8px}
+.bar div{flex:1;background:var(--ac);border-radius:4px 4px 0 0;min-height:2px}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+<div class="row"><h1>Запись</h1><span class="sp"></span><span class="mu" id="sy"></span><span class="mu" id="today"></span><button class="btn g s" id="lo">Выйти</button></div>
+<nav id="nav"></nav>
+</header>
+<main id="app"></main>
+<dialog id="dlg"><form method="dialog" id="frm"></form></dialog>
+
+<script>
+const KEY="zapis_ru_v1",H0=8,H1=21,PH=56;
+const ST={wait:["Ожидается","w"],came:["Пришёл","c"],paid:["Оплачено","d"],noshow:["Не пришёл","x"],cancel:["Отменена","x"]};
+const D0={staff:[{id:1,name:"Дилноза",role:"Стилист",color:"#0f766e",from:"09:00",to:"19:00"},{id:2,name:"Мадина",role:"Мастер маникюра",color:"#c2410c",from:"10:00",to:"20:00"},{id:3,name:"Сардор",role:"Барбер",color:"#7c3aed",from:"09:00",to:"18:00"}],
+services:[{id:1,name:"Стрижка женская",cat:"Волосы",price:80000,min:60},{id:2,name:"Маникюр",cat:"Ногти",price:90000,min:60},{id:3,name:"Стрижка мужская",cat:"Волосы",price:50000,min:30},{id:4,name:"Окрашивание",cat:"Волосы",price:250000,min:120},{id:5,name:"Педикюр",cat:"Ногти",price:120000,min:90}],
+clients:[{id:1,name:"Азиза Каримова",phone:"+998 90 123 45 67",note:"Аллергия на аммиак"},{id:2,name:"Жасур Алиев",phone:"+998 91 765 43 21",note:""},{id:3,name:"Нодира Юсупова",phone:"+998 93 555 11 22",note:"Любит чай без сахара"}],appts:[]};
+let S={staff:[],services:[],clients:[],appts:[]},V=0,TOK=null,SLUG="",dirty=false,sT=null;
+try{TOK=localStorage.getItem("zt")}catch(e){}
+const api=(m,u,b)=>fetch(u,{method:m,headers:{"Content-Type":"application/json",...(TOK?{Authorization:"Bearer "+TOK}:{})},body:b?JSON.stringify(b):undefined});
+const ds=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const addD=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return ds(d)};
+
+const setSync=t=>{const e=document.getElementById("sy");if(e)e.textContent=t};
+function save(){dirty=true;setSync("…");clearTimeout(sT);sT=setTimeout(pushState,400)}
+async function pushState(){try{const r=await api("PUT","/api/state",{state:S,v:V}),j=await r.json();
+ if(r.status==409){S=j.state;V=j.v;dirty=false;setSync("Обновлено другим пользователем");render();return}
+ if(!r.ok){setSync("Ошибка сохранения");return}V=j.v;dirty=false;setSync("Сохранено ✓")}catch(e){setSync("Нет связи")}}
+const $=s=>document.querySelector(s);
+const get=(a,id)=>S[a].find(x=>x.id==id)||{name:"—",price:0,min:30,color:"#888",from:"09:00",to:"18:00",phone:"",note:""};
+const nid=a=>Math.max(0,...S[a].map(x=>x.id))+1;
+const fmt=n=>Math.round(n).toLocaleString("ru-RU")+" сум";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toM=t=>{const[h,m]=t.split(":");return +h*60+ +m};
+const toT=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+const fd=s=>new Date(s+"T12:00").toLocaleDateString("ru-RU",{weekday:"short",day:"numeric",month:"long"});
+const rev=a=>a.status=="paid"?(a.final??get("services",a.service).price):0;
+const C=()=>S.cfg||(S.cfg={acc:5,t1:500000,d1:5,t2:1500000,d2:10});
+const spent=(c,ign)=>S.appts.filter(a=>a.client==c&&a.status=="paid"&&a.id!=ign).reduce((s,a)=>s+rev(a),0);
+const bonus=(c,ign)=>S.appts.filter(a=>a.client==c&&a.status=="paid"&&a.id!=ign).reduce((s,a)=>s+(a.earned||0)-(a.used||0),0);
+const disc=sp=>{const c=C();return sp>=c.t2?c.d2:sp>=c.t1?c.d1:0};
+function pay(o,old,used){if(o.status!="paid")return;
+ if(old.status=="paid"&&old.final!=null){Object.assign(o,{final:old.final,used:old.used,earned:old.earned,disc:old.disc});return}
+ const sv=get("services",o.service),d=disc(spent(o.client,o.id)),base=Math.round(sv.price*(1-d/100));
+ used=Math.max(0,Math.min(used,bonus(o.client,o.id),base));o.disc=d;o.used=used;o.final=base-used;o.earned=Math.round(o.final*C().acc/100)}
+let tab="rec",day=ds(new Date()),q="",ob={svc:1,staff:0,date:ds(new Date())};
+const tabs={rec:"Записи",cli:"Клиенты",srv:"Услуги",stf:"Сотрудники",rep:"Отчёты",onl:"Онлайн-запись",stk:"Склад",pay:"Зарплата",loy:"Лояльность"};
+$("#today").textContent=new Date().toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
+
+function isFree(st,date,start,dur,ign){const s=get("staff",st);if(start<toM(s.from)||start+dur>toM(s.to))return false;
+ return !S.appts.some(x=>x.id!=ign&&x.staff==st&&x.date==date&&x.status!="cancel"&&toM(x.time)<start+dur&&start<toM(x.time)+get("services",x.service).min)}
+
+function openForm(html,onsave,del){
+ $("#frm").innerHTML=html+`<div class="row" style="margin-top:14px">${del?'<button class="btn r" value="del" formnovalidate>Удалить</button>':""}<span class="sp"></span><button class="btn g" value="x" formnovalidate>Отмена</button>${onsave?'<button class="btn" value="ok">Сохранить</button>':""}</div>`;
+ $("#dlg").showModal();
+ $("#frm").onsubmit=e=>{const v=e.submitter&&e.submitter.value;if(v=="ok")onsave(new FormData($("#frm")));if(v=="del"&&confirm("Удалить?"))del()};
+}
+const opts=(a,sel)=>S[a].map(x=>`<option value="${x.id}" ${x.id==sel?"selected":""}>${esc(x.name)}</option>`).join("");
+
+function apptForm(a){
+ if(!S.staff.length||!S.clients.length||!S.services.length){alert("Сначала добавьте сотрудника, клиента и услугу.");return}
+ const n=!a.id;
+ openForm(`<h3 style="margin:0">${n?"Новая запись":"Запись"}</h3>
+ <label>Клиент</label><select name="client">${opts("clients",a.client)}</select>
+ <label>Услуга</label><select name="service">${S.services.map(s=>`<option value="${s.id}" ${s.id==a.service?"selected":""}>${esc(s.name)} — ${fmt(s.price)}</option>`).join("")}</select>
+ <label>Сотрудник</label><select name="staff">${opts("staff",a.staff)}</select>
+ <div class="row"><div class="sp"><label>Дата</label><input type="date" name="date" value="${a.date}" required></div><div class="sp"><label>Время</label><input type="time" name="time" value="${a.time}" step="900" required></div></div>
+ <label>Статус</label><select name="status">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k==a.status?"selected":""}>${v[0]}</option>`).join("")}</select>
+ <label>Комментарий</label><input name="comment" value="${esc(a.comment)}">
+ <label>${a.status=="paid"?`Оплачено: ${fmt(a.final??0)} (скидка ${a.disc||0}%, бонусов списано ${fmt(a.used||0)})`:`Списать бонусы при оплате (доступно ${fmt(bonus(a.client))}, скидка клиента ${disc(spent(a.client))}%)`}</label><input name="used" type="number" min="0" value="0" ${a.status=="paid"?"disabled":""}>`,
+ f=>{const o={id:a.id||nid("appts"),date:f.get("date"),time:f.get("time"),staff:+f.get("staff"),client:+f.get("client"),service:+f.get("service"),status:f.get("status"),comment:f.get("comment")};pay(o,a,+f.get("used")||0);
+  if(o.status!="cancel"&&!isFree(o.staff,o.date,toM(o.time),get("services",o.service).min,o.id)&&!confirm("Сотрудник занят или вне рабочего времени. Всё равно сохранить?"))return;
+  S.appts=S.appts.filter(x=>x.id!=o.id).concat(o);save();render()},n?null:()=>{S.appts=S.appts.filter(x=>x.id!=a.id);save();render()});
+}
+function simpleForm(coll,title,fields,item){item=item||{};
+ openForm(`<h3 style="margin:0">${title}</h3>`+fields.map(([k,l,t,req])=>`<label>${l}</label><input name="${k}" type="${t||"text"}" value="${esc(item[k]??(t=="color"?"#0f766e":""))}" ${req===false?"":"required"}>`).join(""),
+ f=>{const o={id:item.id||nid(coll)};fields.forEach(([k,,t])=>o[k]=t=="number"?+f.get(k):f.get(k).trim());S[coll]=S[coll].filter(x=>x.id!=o.id).concat(o).sort((a,b)=>a.id-b.id);save();render()});}
+
+function render(){
+ $("#nav").innerHTML=Object.entries(tabs).map(([k,v])=>`<button class="${k==tab?"on":""}" data-t="${k}">${v}</button>`).join("");
+ const m=$("#app");
+ if(tab=="rec"){
+  const list=S.appts.filter(a=>a.date==day&&a.status!="cancel"),sum=list.reduce((s,a)=>s+get("services",a.service).price,0);
+  m.innerHTML=`<div class="row" style="margin-bottom:10px"><button class="btn g s" id="pv">‹</button><input type="date" id="dp" value="${day}" style="width:auto"><button class="btn g s" id="nx">›</button><button class="btn g s" id="td">Сегодня</button><span class="sp"></span><button class="btn" id="add">+ Запись</button></div>
+  <div class="mu" style="margin-bottom:8px">${fd(day)} · записей: ${list.length} · ожидается ${fmt(sum)}. Нажмите на пустое место, чтобы создать запись.</div>
+  <div class="tl"><div class="hrs"><div style="height:36px;border:0"></div>${Array.from({length:H1-H0},(_,i)=>`<div>${H0+i}:00</div>`).join("")}</div>
+  ${S.staff.map(st=>{const a=toM(st.from),b=toM(st.to),px=v=>(v-H0*60)/60*PH;
+   return `<div class="col"><div class="ch" style="border-color:${st.color}">${esc(st.name)}</div><div class="bd" data-s="${st.id}" style="height:${(H1-H0)*PH}px">
+   <div class="off" style="top:0;height:${px(a)}px"></div><div class="off" style="top:${px(b)}px;bottom:0"></div>
+   ${S.appts.filter(x=>x.date==day&&x.staff==st.id).map(x=>{const sv=get("services",x.service);return `<div class="blk ${x.status}" data-i="${x.id}" style="top:${px(toM(x.time))}px;height:${sv.min/60*PH-2}px;border-color:${st.color}"><b>${x.time}</b> ${esc(get("clients",x.client).name)}<br>${esc(sv.name)}</div>`}).join("")}</div></div>`}).join("")}</div>`;
+  const go=d=>{day=d;render()};$("#pv").onclick=()=>go(addD(day,-1));$("#nx").onclick=()=>go(addD(day,1));$("#td").onclick=()=>go(ds(new Date()));$("#dp").onchange=e=>go(e.target.value||day);
+  $("#add").onclick=()=>apptForm({date:day,time:"10:00",staff:S.staff[0]?.id,client:S.clients[0]?.id,service:S.services[0]?.id,status:"wait",comment:""});
+  m.querySelectorAll(".blk").forEach(b=>b.onclick=e=>{e.stopPropagation();apptForm(S.appts.find(x=>x.id==b.dataset.i))});
+  m.querySelectorAll(".bd").forEach(b=>b.onclick=e=>{const r=b.getBoundingClientRect(),min=Math.round((e.clientY-r.top)/PH*2)/2*60+H0*60;
+   apptForm({date:day,time:toT(min),staff:+b.dataset.s,client:S.clients[0]?.id,service:S.services[0]?.id,status:"wait",comment:""})});
+ }
+ else if(tab=="rep"){
+  const days=Array.from({length:7},(_,i)=>addD(ds(new Date()),i-6)),vals=days.map(d=>S.appts.filter(a=>a.date==d).reduce((s,a)=>s+rev(a),0)),mx=Math.max(1,...vals);
+  const paid=S.appts.filter(a=>a.status=="paid"),total=paid.reduce((s,a)=>s+rev(a),0);
+  const svc=S.services.map(s=>({n:s.name,c:paid.filter(a=>a.service==s.id).length,r:paid.filter(a=>a.service==s.id).reduce((x,a)=>x+rev(a),0)})).sort((a,b)=>b.r-a.r);
+  const stf=S.staff.map(s=>({n:s.name,c:paid.filter(a=>a.staff==s.id).length,r:paid.filter(a=>a.staff==s.id).reduce((x,a)=>x+rev(a),0)}));
+  const ns=S.appts.filter(a=>a.status=="noshow").length,cn=S.appts.filter(a=>a.status=="cancel").length;
+  m.innerHTML=`<div class="grid"><div class="card stat"><span class="mu">Выручка (оплачено)</span><b>${fmt(total)}</b></div><div class="card stat"><span class="mu">Средний чек</span><b>${fmt(paid.length?total/paid.length:0)}</b></div><div class="card stat"><span class="mu">Визитов оплачено</span><b>${paid.length}</b></div><div class="card stat"><span class="mu">Не пришли / отмены</span><b>${ns} / ${cn}</b></div></div>
+  <div class="card"><b>Выручка за 7 дней</b><div class="bar">${vals.map((v,i)=>`<div title="${days[i]}: ${fmt(v)}" style="height:${v/mx*100}%"></div>`).join("")}</div><div class="row mu" style="gap:6px">${days.map(d=>`<span style="flex:1;text-align:center">${d.slice(8)}.${d.slice(5,7)}</span>`).join("")}</div></div>
+  <div class="card"><b>Услуги</b>${svc.map(x=>`<div class="row" style="padding:5px 0"><span class="sp">${esc(x.n)}</span><span class="mu">${x.c} шт.</span><b>${fmt(x.r)}</b></div>`).join("")}</div>
+  <div class="card"><b>Сотрудники</b>${stf.map(x=>`<div class="row" style="padding:5px 0"><span class="sp">${esc(x.n)}</span><span class="mu">${x.c} визитов</span><b>${fmt(x.r)}</b></div>`).join("")}</div>
+  <button class="btn r" id="rs">Сбросить все данные</button>`;
+  $("#rs").onclick=()=>{if(confirm("Все данные будут удалены. Продолжить?")){S={staff:[],services:[],clients:[],appts:[]};save();render()}};
+ }
+ else if(tab=="onl"){
+  const sv=get("services",ob.svc),cand=ob.staff?[ob.staff]:S.staff.map(s=>s.id),sl=[];
+  for(let t=H0*60;t<H1*60;t+=30){const st=cand.find(id=>isFree(id,ob.date,t,sv.min));if(st)sl.push([t,st])}
+  m.innerHTML=`<div class="card"><b>Страница записи для клиентов</b><div class="mu" style="user-select:all;margin:4px 0;word-break:break-all">${location.origin}/b/${SLUG}</div><div class="mu">Так клиент выбирает услугу, мастера и свободное время. Запись сразу появится в календаре.</div>
+  <label>Услуга</label><select id="os">${S.services.map(s=>`<option value="${s.id}" ${s.id==ob.svc?"selected":""}>${esc(s.name)} — ${fmt(s.price)}, ${s.min} мин</option>`).join("")}</select>
+  <label>Мастер</label><select id="om"><option value="0">Любой свободный</option>${opts("staff",ob.staff)}</select>
+  <label>Дата</label><input type="date" id="od" value="${ob.date}" min="${ds(new Date())}">
+  <div class="slots">${sl.length?sl.map(([t,s])=>`<button class="btn g s" data-t="${t}" data-s="${s}">${toT(t)}</button>`).join(""):'<span class="mu">Нет свободного времени. Выберите другую дату.</span>'}</div></div>`;
+  $("#os").onchange=e=>{ob.svc=+e.target.value;render()};$("#om").onchange=e=>{ob.staff=+e.target.value;render()};$("#od").onchange=e=>{ob.date=e.target.value||ob.date;render()};
+  m.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>openForm(`<h3 style="margin:0">${toT(+b.dataset.t)}, ${fd(ob.date)}</h3><div class="mu">${esc(sv.name)} · ${esc(get("staff",b.dataset.s).name)}</div><label>Ваше имя</label><input name="n" required><label>Телефон</label><input name="p" type="tel" required>`,
+   f=>{const p=f.get("p").trim();let c=S.clients.find(x=>x.phone.replace(/\D/g,"")==p.replace(/\D/g,""));if(!c){c={id:nid("clients"),name:f.get("n").trim(),phone:p,note:""};S.clients.push(c)}
+    S.appts.push({id:nid("appts"),date:ob.date,time:toT(+b.dataset.t),staff:+b.dataset.s,client:c.id,service:ob.svc,status:"wait",comment:"Онлайн-запись"});save();day=ob.date;tab="rec";render()}));
+ }
+ else if(tab=="stk"){S.stock=S.stock||[];
+  const F=[["name","Название"],["unit","Единица (шт, мл)"],["qty","Остаток","number"],["min","Минимальный остаток","number"]];
+  m.innerHTML=`<div class="row" style="margin-bottom:12px"><span class="sp mu">Расходные материалы. Красная метка появляется, когда остаток ниже минимума.</span><button class="btn" id="add">+ Товар</button></div>`+(S.stock.length?S.stock.map(x=>`<div class="card row"><div class="sp"><b>${esc(x.name)}</b> ${x.qty<=x.min?'<span class="tag x">Заканчивается</span>':''}<div class="mu">Остаток: ${x.qty} ${esc(x.unit)} · минимум ${x.min}</div></div><button class="btn g s" data-m="${x.id}" data-v="-1">−1</button><button class="btn g s" data-m="${x.id}" data-v="1">+1</button><button class="btn g s" data-m="${x.id}" data-v="10">+10</button><button class="btn g s" data-e="${x.id}">Изменить</button><button class="btn g s" data-d="${x.id}">Удалить</button></div>`).join(""):'<div class="empty">Склад пуст. Добавьте первый товар.</div>');
+  $("#add").onclick=()=>simpleForm("stock","Товар: добавить",F);
+  m.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const x=get("stock",b.dataset.m);x.qty=Math.max(0,x.qty+ +b.dataset.v);save();render()});
+  m.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>simpleForm("stock","Товар: изменить",F,get("stock",b.dataset.e)));
+  m.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(confirm("Удалить?")){S.stock=S.stock.filter(x=>x.id!=b.dataset.d);save();render()}});
+ }
+ else if(tab=="pay"){const pm=globalThis.pm=globalThis.pm||ds(new Date()).slice(0,7);
+  const rows=S.staff.map(st=>{const l=S.appts.filter(a=>a.staff==st.id&&a.status=="paid"&&a.date.slice(0,7)==pm),r=l.reduce((s,a)=>s+rev(a),0),rt=st.rate??40;return{n:st.name,c:l.length,r,rt,e:r*rt/100}});
+  const tr=rows.reduce((s,x)=>s+x.r,0),te=rows.reduce((s,x)=>s+x.e,0);
+  m.innerHTML=`<div class="row" style="margin-bottom:12px"><input type="month" id="pm" value="${pm}" style="width:auto"></div><div class="grid"><div class="card stat"><span class="mu">Выручка за месяц</span><b>${fmt(tr)}</b></div><div class="card stat"><span class="mu">К выплате сотрудникам</span><b>${fmt(te)}</b></div><div class="card stat"><span class="mu">Остаётся салону</span><b>${fmt(tr-te)}</b></div></div>`+rows.map(x=>`<div class="card row"><div class="sp"><b>${esc(x.n)}</b><div class="mu">Визитов: ${x.c} · выручка ${fmt(x.r)} · ставка ${x.rt}%</div></div><b>${fmt(x.e)}</b></div>`).join("")+'<div class="mu">Процент задаётся в карточке сотрудника, вкладка «Сотрудники».</div>';
+  $("#pm").onchange=e=>{globalThis.pm=e.target.value||pm;render()}}
+ else if(tab=="loy"){const c=C();
+  m.innerHTML=`<div class="card"><b>Правила лояльности</b><div class="mu">Бонусы начисляются с оплаченной суммы и списываются при оплате записи. Скидка зависит от суммы прошлых оплат клиента.</div>
+  <label>Начислять бонусами, % от оплаты</label><input id="a1" type="number" value="${c.acc}">
+  <div class="row"><div class="sp"><label>Скидка 1: от суммы (сум)</label><input id="a2" type="number" value="${c.t1}"></div><div class="sp"><label>Скидка, %</label><input id="a3" type="number" value="${c.d1}"></div></div>
+  <div class="row"><div class="sp"><label>Скидка 2: от суммы (сум)</label><input id="a4" type="number" value="${c.t2}"></div><div class="sp"><label>Скидка, %</label><input id="a5" type="number" value="${c.d2}"></div></div>
+  <button class="btn" id="sv" style="margin-top:12px">Сохранить правила</button></div><div class="card"><b>Клиенты</b>${S.clients.slice().sort((a,b)=>spent(b.id)-spent(a.id)).map(x=>`<div class="row" style="padding:6px 0"><span class="sp">${esc(x.name)}<div class="mu">потрачено ${fmt(spent(x.id))}</div></span><span class="tag">скидка ${disc(spent(x.id))}%</span><b>${fmt(bonus(x.id))}</b></div>`).join("")}</div>`;
+  $("#sv").onclick=()=>{Object.assign(c,{acc:+$("#a1").value,t1:+$("#a2").value,d1:+$("#a3").value,t2:+$("#a4").value,d2:+$("#a5").value});save();$("#sv").textContent="Сохранено ✓"}}
+ else{
+  const cfg={cli:["clients","Клиент",[["name","Имя"],["phone","Телефон","tel"],["note","Заметка","text",false]]],srv:["services","Услуга",[["name","Название"],["cat","Категория"],["price","Цена (сум)","number"],["min","Длительность (мин)","number"]]],stf:["staff","Сотрудник",[["name","Имя"],["role","Должность"],["color","Цвет","color"],["from","Начало работы","time"],["to","Конец работы","time"],["rate","Процент от выручки (зарплата)","number"]]]}[tab];
+  const[coll,lbl,fields]=cfg;
+  const view={cli:c=>{const v=S.appts.filter(a=>a.client==c.id),p=v.filter(a=>a.status=="paid");return `<b>${esc(c.name)}</b><div class="mu">${esc(c.phone)} · визитов: ${p.length} · потрачено ${fmt(p.reduce((s,a)=>s+rev(a),0))} · бонусы ${fmt(bonus(c.id))}</div>${c.note?`<div class="mu">📝 ${esc(c.note)}</div>`:""}`},
+   srv:s=>`<b>${esc(s.name)}</b><div class="mu">${esc(s.cat)} · ${fmt(s.price)} · ${s.min} мин</div>`,
+   stf:s=>`<b style="color:${s.color}">${esc(s.name)}</b><div class="mu">${esc(s.role)} · ${s.from}–${s.to}</div>`}[tab];
+  const items=S[coll].filter(x=>tab!="cli"||(x.name+x.phone).toLowerCase().includes(q.toLowerCase()));
+  m.innerHTML=`<div class="row" style="margin-bottom:12px">${tab=="cli"?'<input id="q" placeholder="Поиск по имени или телефону" style="flex:1;min-width:150px" value="'+esc(q)+'">':'<span class="sp"></span>'}<button class="btn" id="add">+ Добавить</button></div>`+
+  (items.length?items.map(x=>`<div class="card row"><div class="sp">${view(x)}</div>${tab=="cli"?`<button class="btn g s" data-h="${x.id}">История</button>`:""}<button class="btn g s" data-e="${x.id}">Изменить</button><button class="btn g s" data-d="${x.id}">Удалить</button></div>`).join(""):'<div class="empty">Ничего не найдено.</div>');
+  if(tab=="cli")$("#q").oninput=e=>{q=e.target.value;const p=e.target.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(p,p)};
+  $("#add").onclick=()=>simpleForm(coll,lbl+": добавить",fields);
+  m.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>simpleForm(coll,lbl+": изменить",fields,get(coll,b.dataset.e)));
+  m.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{if(confirm("Удалить?")){S[coll]=S[coll].filter(x=>x.id!=b.dataset.d);save();render()}});
+  m.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const c=get("clients",b.dataset.h),v=S.appts.filter(a=>a.client==c.id).sort((a,b)=>b.date.localeCompare(a.date));
+   openForm(`<h3 style="margin:0">${esc(c.name)}</h3><div class="mu">${esc(c.phone)}</div>${v.length?v.map(a=>`<div class="card row" style="margin-top:8px"><span class="sp"><b>${fd(a.date)}, ${a.time}</b><div class="mu">${esc(get("services",a.service).name)} · ${esc(get("staff",a.staff).name)}</div></span><span class="tag ${ST[a.status][1]}">${ST[a.status][0]}</span></div>`).join(""):'<div class="empty">Визитов пока нет.</div>'}`)});
+ }
+}
+$("#nav").onclick=e=>{const t=e.target.dataset.t;if(t){tab=t;render()}};
+function showLogin(msg){let d=document.getElementById("lg");if(!d){d=document.createElement("div");d.id="lg";d.style.cssText="position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px";document.body.appendChild(d)}
+ d.innerHTML=`<div class="card" style="width:min(380px,100%)"><h1>Запись</h1><div class="mu">Программа для салонов красоты</div><label>Название салона (при регистрации)</label><input id="ls"><label>Email</label><input id="le" type="email"><label>Пароль (минимум 8 символов)</label><input id="lp" type="password"><div id="lm" style="color:var(--rd);min-height:22px;margin-top:8px">${msg||""}</div><div class="row"><button class="btn" id="li">Войти</button><button class="btn g" id="lr">Регистрация</button></div></div>`;
+ const go=async mode=>{try{const r=await fetch("/api/"+mode,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({salon:$("#ls").value,email:$("#le").value,password:$("#lp").value})}),j=await r.json();if(!r.ok){$("#lm").textContent=j.message||"Ошибка";return}TOK=j.token;try{localStorage.setItem("zt",TOK)}catch(e){}d.remove();boot()}catch(e){$("#lm").textContent="Нет связи с сервером"}};
+ $("#li").onclick=()=>go("login");$("#lr").onclick=()=>go("register")}
+async function boot(){if(!TOK){showLogin();return}
+ let r;try{r=await api("GET","/api/state")}catch(e){showLogin("Нет связи с сервером");return}
+ if(r.status==401){TOK=null;try{localStorage.removeItem("zt")}catch(e){}showLogin();return}
+ const j=await r.json();S=Object.assign({staff:[],services:[],clients:[],appts:[]},j.state);V=j.v;SLUG=j.slug;
+ $("#lo").onclick=()=>{try{localStorage.removeItem("zt")}catch(e){}location.reload()};render();if(!window._pl)window._pl=setInterval(poll,15000)}
+async function poll(){if(dirty||!TOK||$("#dlg").open)return;try{const r=await api("GET","/api/state?since="+V);if(!r.ok)return;const j=await r.json();if(j.same)return;S=Object.assign(S,j.state);V=j.v;render()}catch(e){}}
+boot();
+</script>
+</body>
+</html>
